@@ -200,11 +200,15 @@
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="codecaves.h" />
     <ClInclude Include="ReplacementFuncs.h" />
-    <ClInclude Include="D3D8PortraitFix.h" />
     <ClInclude Include="INIReader.h" />
     <ClInclude Include="Memory.h" />
     <ClInclude Include="NMCO.h" />
     <ClInclude Include="SelectCharMacFix.h" />
+    <ClInclude Include="ModeTableFix.h" />
+    <ClInclude Include="LocaleFix.h" />
+    <ClInclude Include="NetAdapterFix.h" />
+    <ClInclude Include="SoundStreamFix.h" />
+    <ClInclude Include="D3D8PortraitFix.h" />
     <ClInclude Include="AutoTypes.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -215,13 +219,17 @@
     <ClCompile Include="BossHP.cpp" />
     <ClCompile Include="HpMpAlert.cpp" />
     <ClCompile Include="Client.cpp" />
-    <ClCompile Include="D3D8PortraitFix.cpp" />
     <ClCompile Include="ijl15.cpp" />
     <ClCompile Include="ZAllocEx.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="NMCO.cpp" />
     <ClCompile Include="SelectCharMacFix.cpp" />
+    <ClCompile Include="ModeTableFix.cpp" />
+    <ClCompile Include="LocaleFix.cpp" />
+    <ClCompile Include="NetAdapterFix.cpp" />
+    <ClCompile Include="SoundStreamFix.cpp" />
+    <ClCompile Include="D3D8PortraitFix.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
