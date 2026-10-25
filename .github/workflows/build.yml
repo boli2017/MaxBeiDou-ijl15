@@ -2,10 +2,10 @@ name: Build
 
 on:
   push:
-    branches: [BeiDou]
+    branches: [BeiDou, master, robot]
     tags: ['v*']
   pull_request:
-    branches: [BeiDou]
+    branches: [BeiDou, master, robot]
   workflow_dispatch:
 
 permissions:

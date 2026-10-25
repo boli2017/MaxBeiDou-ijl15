@@ -13,6 +13,7 @@
 #include "LocaleFix.h"
 #include "NetAdapterFix.h"
 #include "SoundStreamFix.h"
+#include "InGameRes.h"
 #pragma comment(lib, "ws2_32.lib")
 
 // config.ini can use IP or hostname (ServerIP_Address=...).
@@ -106,6 +107,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			Client::talkRepeat = reader.GetBoolean("optional", "talkRepeat", false);
 			Client::talkTime = reader.GetInteger("optional", "talkTime", 2000);
 
+			// 游戏内实时切换分辨率（详见 InGameRes.h）
+			InGameRes::g_bEnabled = reader.GetBoolean("general", "InGameResSwitch", true);
+			InGameRes::g_bSaveToConfig = reader.GetBoolean("general", "InGameResSave", true);
+			InGameRes::g_nHotkey = reader.GetInteger("general", "InGameResHotkey", VK_PAUSE);
+			InGameRes::ParseResolutionList(reader.Get("general", "InGameResList",
+				"800x600,1024x768,1280x720,1366x768,1600x900,1920x1080"));
+
 			// [compat] 跨环境兼容修复，四个开关的详细说明见各自的头文件
 			fakeModeInject = reader.GetBoolean("compat", "FakeModeInject", true);
 			forceFontCharset = reader.GetBoolean("compat", "ForceFontCharset", true);
@@ -149,6 +157,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 		std::cout << "Applying resolution " << Client::m_nGameWidth << "x" << Client::m_nGameHeight << std::endl;
 		Client::UpdateResolution();
+		InGameRes::Install(InGameRes::g_bEnabled); // 游戏内热键切分辨率，必须在 UpdateResolution 之后
 		Client::FixMouseWheel();
 		Client::Chinese();
 		Client::LongQuickSlot();
