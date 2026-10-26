@@ -27,7 +27,10 @@
 //   3) CWzGr2D 换显示模式：FindScreenMode 找到新模式后整体拷进
 //      m_screenMode，并把 m_hrErrorCode 置为 D3DERR_DEVICENOTRESET，
 //      客户端自己的渲染循环下一帧看到错误码会重置 D3D 设备（这条错误码
-//      路径是客户端自带的，kaentake 同样用法）；
+//      路径是客户端自带的，kaentake 同样用法）。重置时 ModeTableFix 挂的
+//      IDirect3DDevice8::Reset 钩子会把后备缓冲区尺寸钉成新的
+//      Client::m_nGameWidth/Height（见 ModeTableFix.h），保证设备尺寸和
+//      第 2 步重写的补丁常量一致；
 //   4) CWndMan::m_pOrgWindow RelMove 到 (-w/2, -h/2)：所有窗口图层
 //      （CWnd::CreateWnd 里 put_origin(m_pOrgWindow)）都以它为 origin，
 //      锚点位移等于整个 UI 平移，按设计坐标定位的元素自动贴合新屏幕；
@@ -35,7 +38,8 @@
 //   6) CMapLoadable::RestoreViewRange + ReloadBack 重算地图视野。
 //
 // 触发：CWndMan::s_Update 每帧被 CWvsApp::CallUpdate 调用，在里面轮询热键
-// （默认 Pause），边沿触发循环切档。
+// （默认 Ctrl+Enter），边沿触发循环切档。修饰键用位掩码配置，
+// 主键与所有要求的修饰键同时按下才算触发。
 // ---------------------------------------------------------------------------
 
 namespace InGameRes {
@@ -87,7 +91,8 @@ static FindScreenMode_t g_pFindScreenMode = nullptr;
 // ---- 全局状态（默认值与 config.ini 里的默认值保持一致，INI 缺失时走这里）----
 bool g_bEnabled = true;
 bool g_bSaveToConfig = true;
-int g_nHotkey = VK_PAUSE;
+int g_nHotkey = VK_RETURN;                                       // Enter
+int g_nHotkeyMod = HOTKEY_MOD_CTRL;                              // Ctrl+Enter
 
 // 默认预设列表（config.ini 的 InGameResList 可覆盖）
 const Resolution kDefaultResolutions[] = {
@@ -391,6 +396,27 @@ static HWND GetGameWindow()
 	return *(HWND*)((char*)pApp + dwCWvsApp_m_hWnd);
 }
 
+// 主键按下 + 配置里要求的修饰键（Alt/Shift/Ctrl）都按下才算热键触发。
+// 注意：修饰键是用 GetAsyncKeyState 轮询的全局状态，不是消息，所以游戏
+// 窗口内的输入框（聊天框等）拿到焦点时同样会触发——默认组合 Ctrl+Enter
+// 在聊天里也不会误触（v83 的聊天框只认单独 Enter）。
+static bool IsHotkeyDown()
+{
+	if ((GetAsyncKeyState(g_nHotkey) & 0x8000) == 0) {
+		return false;
+	}
+	if ((g_nHotkeyMod & HOTKEY_MOD_ALT) && (GetAsyncKeyState(VK_MENU) & 0x8000) == 0) {
+		return false;
+	}
+	if ((g_nHotkeyMod & HOTKEY_MOD_SHIFT) && (GetAsyncKeyState(VK_SHIFT) & 0x8000) == 0) {
+		return false;
+	}
+	if ((g_nHotkeyMod & HOTKEY_MOD_CTRL) && (GetAsyncKeyState(VK_CONTROL) & 0x8000) == 0) {
+		return false;
+	}
+	return true;
+}
+
 void __cdecl CWndMan_s_Update_hook()
 {
 	g_pCWndMan_s_Update_orig();
@@ -406,7 +432,7 @@ void __cdecl CWndMan_s_Update_hook()
 		return;
 	}
 
-	const bool bDown = (GetAsyncKeyState(g_nHotkey) & 0x8000) != 0;
+	const bool bDown = IsHotkeyDown();
 	if (bDown && !g_bHotkeyDown) {
 		g_bHotkeyDown = true;
 		g_nPendingIndex = g_nCurrentIndex + 1;

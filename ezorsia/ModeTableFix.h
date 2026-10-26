@@ -18,5 +18,17 @@
 // 并不会真的去切显示模式，所以这个"谎"不会有副作用。
 //
 // 目标分辨率本来就在表里就一条都不补，因此对能正常启动的机器毫无影响。
+//
+// 另外这里还挂了一个 IDirect3DDevice8::Reset 钩子（ModeTableFix_InstallResetFix）：
+//   客户端每次重置设备都经过它（启动建设备、切分辨率后重建、设备丢失恢复）。
+//   钩子把后备缓冲区尺寸钉在 Client::m_nGameWidth/Height 上，窗口模式下把刷新率
+//   清零，Reset 失败时依次按"宽度 8 字节对齐""像素格式交 D3D 自选"重试。
+//   作用：切分辨率时保证"设备尺寸 == 补丁后的分辨率"，并给补出来的假模式/特殊
+//   驱动一个回退，避免切档后黑屏或卡在设备丢失。全屏重置不插手。
+//   槽位已在本仓库 Gr2D_DX8.dll 反汇编核对：设备重置流程在 0x50408E34，
+//   Reset = 设备虚表槽位 14（+0x38），TestCooperativeLevel = 槽位 3（+0x0C）。
 
 void ModeTableFix_Install(bool enable);
+
+// 设备 Reset 钩子。必须在客户端创建 d3d8 设备之前调用（DllMain 阶段即可）。
+void ModeTableFix_InstallResetFix(bool enable);

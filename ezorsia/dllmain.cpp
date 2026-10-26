@@ -75,6 +75,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		bool forceFontCharset = true;
 		bool fixAdapterInfo = true;
 		bool reuseSoundStreams = true;
+		bool d3d8ResetFix = true;
 		INIReader reader("config.ini");
 		if (reader.ParseError() == 0) {
 			Client::m_nGameWidth = reader.GetInteger("general", "width", 1280);
@@ -110,7 +111,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			// 游戏内实时切换分辨率（详见 InGameRes.h）
 			InGameRes::g_bEnabled = reader.GetBoolean("general", "InGameResSwitch", true);
 			InGameRes::g_bSaveToConfig = reader.GetBoolean("general", "InGameResSave", true);
-			InGameRes::g_nHotkey = reader.GetInteger("general", "InGameResHotkey", VK_PAUSE);
+			// 主键默认 Enter(0x0D)，修饰键默认 Ctrl(4)，即 Ctrl+Enter
+			InGameRes::g_nHotkey = reader.GetInteger("general", "InGameResHotkey", VK_RETURN);
+			InGameRes::g_nHotkeyMod = reader.GetInteger("general", "InGameResHotkeyMod",
+				InGameRes::HOTKEY_MOD_CTRL);
 			InGameRes::ParseResolutionList(reader.Get("general", "InGameResList",
 				"800x600,1024x768,1280x720,1366x768,1600x900,1920x1080"));
 
@@ -119,10 +123,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			forceFontCharset = reader.GetBoolean("compat", "ForceFontCharset", true);
 			fixAdapterInfo = reader.GetBoolean("compat", "FixAdapterInfo", true);
 			reuseSoundStreams = reader.GetBoolean("compat", "ReuseSoundStreams", true);
+			d3d8ResetFix = reader.GetBoolean("compat", "D3D8ResetFix", true);
 		}
 
 		// 目标分辨率不在显卡模式表里时补上（RDP会话、macOS内置屏）
 		ModeTableFix_Install(fakeModeInject);
+		// 设备 Reset 兜底：后备缓冲区钉在当前分辨率 + 失败回退（见 ModeTableFix.h）
+		ModeTableFix_InstallResetFix(d3d8ResetFix);
 		// 非中文系统上的中文显示（英文Windows、macOS上的Wine）
 		LocaleFix_Install(forceFontCharset);
 		// 选完角色枚举网卡时，客户端不检查 GetAdaptersInfo 的返回值就遍历缓冲区

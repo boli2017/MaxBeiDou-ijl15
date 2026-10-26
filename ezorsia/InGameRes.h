@@ -33,9 +33,17 @@ namespace InGameRes {
 		int height;
 	};
 
+	// 热键修饰键位掩码：1=Alt, 2=Shift, 4=Ctrl，可相加（默认 4 = Ctrl+Enter；3 = Alt+Shift）
+	enum HotkeyMod {
+		HOTKEY_MOD_ALT = 1,
+		HOTKEY_MOD_SHIFT = 2,
+		HOTKEY_MOD_CTRL = 4,
+	};
+
 	extern bool g_bEnabled;                 // config.ini [general] InGameResSwitch
 	extern bool g_bSaveToConfig;            // config.ini [general] InGameResSave
 	extern int g_nHotkey;                   // config.ini [general] InGameResHotkey（虚拟键码）
+	extern int g_nHotkeyMod;                // config.ini [general] InGameResHotkeyMod（修饰键掩码，见 HotkeyMod）
 	extern std::vector<Resolution> g_aResolutions;  // config.ini [general] InGameResList
 	extern int g_nCurrentIndex;             // 当前档位（-1 = 当前分辨率不在列表里）
 
