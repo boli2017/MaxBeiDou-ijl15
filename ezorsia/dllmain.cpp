@@ -13,6 +13,7 @@
 #include "LocaleFix.h"
 #include "NetAdapterFix.h"
 #include "SoundStreamFix.h"
+#include "MobHpTag.h"
 #pragma comment(lib, "ws2_32.lib")
 
 // config.ini can use IP or hostname (ServerIP_Address=...).
@@ -105,6 +106,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			Client::climbSpeed = reader.GetFloat("optional", "climbSpeed", 1.0);
 			Client::talkRepeat = reader.GetBoolean("optional", "talkRepeat", false);
 			Client::talkTime = reader.GetInteger("optional", "talkTime", 2000);
+			// 全怪物血条百分比标签（移植自 kaentake）
+			MobHpTag::enabled = reader.GetBoolean("optional", "ShowMobHPTag", true);
 
 			// [compat] 跨环境兼容修复，四个开关的详细说明见各自的头文件
 			fakeModeInject = reader.GetBoolean("compat", "FakeModeInject", true);
@@ -159,6 +162,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		Client::NoPassword();
 		Client::MoreHook();
 		BossHP::Hook();
+		MobHpTag::Hook(); // 全怪物血条百分比标签（移植自 kaentake）
 		Client::WorldMap();
 		Client::RefreshRate(); 
 		Client::DeleteChar();

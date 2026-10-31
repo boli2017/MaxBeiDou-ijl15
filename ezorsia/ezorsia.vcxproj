@@ -172,6 +172,10 @@
       <FileType>CppHeader</FileType>
     </ClInclude>
     <ClInclude Include="BossHP.h" />
+    <ClInclude Include="MobHpTag.h" />
+    <ClInclude Include="WzLib\zcomdef.h" />
+    <ClInclude Include="WzLib\WzInterfaces.h" />
+    <ClInclude Include="WzLib\ClientZtl.h" />
     <ClInclude Include="HpMpAlert.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="FixBuddy.h" />
@@ -217,6 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BossHP.cpp" />
+    <ClCompile Include="MobHpTag.cpp" />
     <ClCompile Include="HpMpAlert.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ijl15.cpp" />

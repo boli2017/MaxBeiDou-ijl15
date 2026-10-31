@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "BossHP.h"
+#include "MobHpTag.h"
 
 const DWORD dw_TSingleton_CUIMiniMap___ms_pInstance = 0x00BED788;
 const DWORD dwCField__ShowMobHpTag = 0x005336CA;
@@ -46,6 +47,7 @@ void BossHP::HookShowMobHPTag() {
 	{
 		_Field__ShowMobHPTag(pThis, edx, dwMobID, nColor, nBgColor, nHP, nMaxHP);
 		DrawBossHpNumber(nHP, nMaxHP);
+		MobHpTag::OnShowMobHPTag(pThis, dwMobID, nHP, nMaxHP); // 全怪物血条百分比（移植自 kaentake）
 	};
 	Memory::SetHook(true, reinterpret_cast<void**>(&_Field__ShowMobHPTag), Hook);
 }
