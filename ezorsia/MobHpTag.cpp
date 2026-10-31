@@ -21,7 +21,7 @@ static IWzResManPtr& GetResMan() {
 
 // 客户端辅助函数：Ztl_variant_t -> IUnknownPtr
 static IUnknownPtr ClientGetUnknown(Ztl_variant_t& v) {
-    typedef IUnknownPtr* (__cdecl* ClientGetUnknown_t)(IUnknownPtr*, Ztl_variant_t&);
+    typedef IUnknown* (__cdecl* ClientGetUnknown_t)(IUnknown**, Ztl_variant_t&);
     static auto fn = reinterpret_cast<ClientGetUnknown_t>(dwClientGetUnknown);
     IUnknownPtr pUnk;
     fn(&pUnk, v);
@@ -43,7 +43,7 @@ static IWzCanvasPtr GetObjectCanvas(const wchar_t* sUOL) {
         return nullptr;
     }
     IUnknownPtr pUnk = ClientGetUnknown(vObj);
-    if (!pUnk || FAILED(pUnk->QueryInterface(__uuidof(IWzCanvas), &pCanvas))) {
+    if (!pUnk || FAILED(pUnk->QueryInterface(__uuidof(IWzCanvas), reinterpret_cast<void**>(&pCanvas)))) {
         return nullptr;
     }
     return pCanvas;
@@ -56,7 +56,7 @@ static IWzPropertyPtr GetObjectProperty(const wchar_t* sUOL) {
         return nullptr;
     }
     IUnknownPtr pUnk = ClientGetUnknown(vObj);
-    if (!pUnk || FAILED(pUnk->QueryInterface(__uuidof(IWzProperty), &pProp))) {
+    if (!pUnk || FAILED(pUnk->QueryInterface(__uuidof(IWzProperty), reinterpret_cast<void**>(&pProp)))) {
         return nullptr;
     }
     return pProp;
