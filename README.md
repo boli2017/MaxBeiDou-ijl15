@@ -34,6 +34,13 @@
 - 增加BossHp百分比显示（在Boss血条的头像下方）
 - 免密模式（须服务端支持，客户端仅解除密码限制）
 - 调整聊天框文字位置
+- 全怪物血条 HP 百分比标签（ShowMobHPTag，移植自 kaentake）
+- Custom.wz 挂载（CustomWz，移植自 kaentake resman；把 Custom.wz 放到客户端目录，
+  为血条标签等提供图源，没有该文件时静默跳过）
+- 运行时动态分辨率（InGameRes，移植自 kaentake resolution）：系统选项窗口新增
+  分辨率下拉框（800x600 ~ 1920x1080 六档），CWndMan 九锚点动态重排 +
+  窗口/光标/对话框/tooltip/状态栏/buff 栏/地图视野/天气全套跟随；
+  登录、商城等界面保持 config.ini 的 width/height，选择持久化到 soScreenResolution
 
 针对中文环境的一些调整：
 

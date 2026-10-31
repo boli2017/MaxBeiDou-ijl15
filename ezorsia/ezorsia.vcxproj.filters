@@ -144,6 +144,18 @@
     <ClInclude Include="MobHpTag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CustomWz.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InGameRes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ktl\ztl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ktl\wvs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="WzLib\zcomdef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -151,6 +163,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WzLib\ClientZtl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WzLib\ClientPcom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HpMpAlert.h">
@@ -207,6 +222,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MobHpTag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CustomWz.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InGameRes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HpMpAlert.cpp">

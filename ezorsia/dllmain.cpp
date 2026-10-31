@@ -14,6 +14,8 @@
 #include "NetAdapterFix.h"
 #include "SoundStreamFix.h"
 #include "MobHpTag.h"
+#include "CustomWz.h"
+#include "InGameRes.h"
 #pragma comment(lib, "ws2_32.lib")
 
 // config.ini can use IP or hostname (ServerIP_Address=...).
@@ -75,6 +77,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		bool forceFontCharset = true;
 		bool fixAdapterInfo = true;
 		bool reuseSoundStreams = true;
+		bool customWzMount = true;
+		bool inGameRes = true;
 		INIReader reader("config.ini");
 		if (reader.ParseError() == 0) {
 			Client::m_nGameWidth = reader.GetInteger("general", "width", 1280);
@@ -108,6 +112,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			Client::talkTime = reader.GetInteger("optional", "talkTime", 2000);
 			// 全怪物血条百分比标签（移植自 kaentake）
 			MobHpTag::enabled = reader.GetBoolean("optional", "ShowMobHPTag", true);
+			// Custom.wz 挂载（移植自 kaentake resman）
+			customWzMount = reader.GetBoolean("general", "CustomWz", true);
+			// 运行时动态分辨率（移植自 kaentake resolution）
+			inGameRes = reader.GetBoolean("general", "InGameRes", true);
 
 			// [compat] 跨环境兼容修复，四个开关的详细说明见各自的头文件
 			fakeModeInject = reader.GetBoolean("compat", "FakeModeInject", true);
@@ -137,7 +145,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		Hookbstr_ctor(true);
 		HookIWzFileSystem__Init(true);
 		HookIWzNameSpace__Mount(true);
-		HookCWvsApp__InitializeResMan(false); //experimental //ty to all the contributors of the ragezone release: Client load .img instead of .wz v62~v92
+		// Custom.wz 挂载（移植自 kaentake resman）：InitializeResMan 完成原版
+		// 挂载后把 Custom.wz 挂进根命名空间，开启后 MobHpTag 等才有图源
+		CustomWz::Install(customWzMount);
 		Hook_StringPool__GetString(true); //hook stringpool modification //ty !! popcorn //ty darter
 		Hook_lpfn_NextLevel(true);
 		HookSaveGlobal(true);
@@ -152,6 +162,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 
 		std::cout << "Applying resolution " << Client::m_nGameWidth << "x" << Client::m_nGameHeight << std::endl;
 		Client::UpdateResolution();
+		// 运行时动态分辨率（移植自 kaentake resolution）：必须在 UpdateResolution
+		// 之后安装（部分常量补丁要覆盖 ezorsia 的静态值）；初始档位取 config.ini
+		InGameRes::SetInitialResolution(Client::m_nGameWidth, Client::m_nGameHeight);
+		InGameRes::Install(inGameRes);
 		Client::FixMouseWheel();
 		Client::Chinese();
 		Client::LongQuickSlot();

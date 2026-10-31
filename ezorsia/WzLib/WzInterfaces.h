@@ -233,9 +233,103 @@ struct __declspec(uuid("6DC8C7CE-8E81-4420-B4F6-4B60B7D5FCDF")) IWzGr2DLayer : p
     virtual HRESULT __stdcall RenderFlash(INT nRenderFlash) = 0;
 };
 
+// IWzNameSpace.idl
+struct __declspec(uuid("A0B5164F-F89B-41B8-8264-15371FD02B4C")) IWzNameSpaceProperty : public IUnknown {
+    virtual HRESULT __stdcall get_item(VARIANT vAux, VARIANT* pvObj) = 0;
+    virtual HRESULT __stdcall get_name(BSTR* psVal) = 0;
+    virtual HRESULT __stdcall get_path(BSTR* psVal) = 0;
+    virtual HRESULT __stdcall get_size(VARIANT* pvVal) = 0;
+    virtual HRESULT __stdcall get_checksum(INT* pnVal) = 0;
+    virtual HRESULT __stdcall get_property(BSTR sPropName, VARIANT* pvVal) = 0;
+};
+
+struct __declspec(uuid("2AEEEB36-A4E1-4E2B-8F6F-2E7BDEC5C53D")) IWzNameSpace : public IUnknown {
+    // 注：[in] BSTR 一律声明为 const wchar_t*（x86 stdcall 下二进制签名相同）
+    virtual HRESULT __stdcall get_item(const wchar_t* sPath, VARIANT* pvObj) = 0;
+    virtual HRESULT __stdcall get_property(const wchar_t* sPath, VARIANT vpPathUsed, IWzNameSpaceProperty** ppVal) = 0;
+    virtual HRESULT __stdcall get__NewEnum(IUnknown** pVal) = 0;
+    virtual HRESULT __stdcall Mount(const wchar_t* sPath, IWzNameSpace* pDown, INT nPriority) = 0;
+    virtual HRESULT __stdcall Unmount(const wchar_t* sPath, VARIANT vDown) = 0;
+    virtual HRESULT __stdcall _OnMountEvent(IWzNameSpace* pUp, IWzNameSpace* pRoot, const wchar_t* sLocation, INT nState) = 0;
+    virtual HRESULT __stdcall _OnGetLocalObject(INT nIndex, const wchar_t* sPath, INT* pnPathUsed, VARIANT* pvRet) = 0;
+};
+
+// IWzWritableNameSpace.idl
+struct __declspec(uuid("EE7659A2-23CD-4E44-86E5-D82A680E83F7")) IWzWritableNameSpace : public IWzNameSpace {
+    virtual HRESULT __stdcall CreateChildNameSpace(const wchar_t* sName, IWzNameSpace** ppNameSpace) = 0;
+    virtual HRESULT __stdcall AddObject(const wchar_t* sName, VARIANT vObj, VARIANT* pvObj) = 0;
+    virtual HRESULT __stdcall Unlink(const wchar_t* sName) = 0;
+};
+
+// IWzFileSystem.idl
+struct __declspec(uuid("352D8655-51E4-4668-8CE4-0866E2B6A5B5")) IWzFileSystem : public IWzWritableNameSpace {
+    virtual HRESULT __stdcall Init(const wchar_t* sPath) = 0;
+};
+
+// IWzArchive.idl
+struct __declspec(uuid("3C39B9AA-18CC-408C-8716-C4FB2117266E")) IWzArchive : public IUnknown {
+    virtual HRESULT __stdcall get_loading(INT* pbLoading) = 0;
+    virtual HRESULT __stdcall Read(BYTE* pv, UINT cb, UINT* pcbRead) = 0;
+    virtual HRESULT __stdcall Write(BYTE* pBuffer, UINT cb, UINT* pcbWritten) = 0;
+    virtual HRESULT __stdcall get_absoluteUOL(BSTR* pVal) = 0;
+    virtual HRESULT __stdcall put_absoluteUOL(const wchar_t* newVal) = 0;
+    virtual HRESULT __stdcall get_position(UINT* puPos) = 0;
+    virtual HRESULT __stdcall get_context(VARIANT* pvContext) = 0;
+    virtual HRESULT __stdcall put_context(VARIANT vContext) = 0;
+};
+
+// IWzSeekableArchive.idl
+struct __declspec(uuid("35C1F133-7F61-496E-878F-9A1758AFA9EA")) IWzSeekableArchive : public IWzArchive {
+    virtual HRESULT __stdcall put_position(UINT uPos) = 0;
+    virtual HRESULT __stdcall get_length(UINT* puLength) = 0;
+    virtual HRESULT __stdcall put_length(UINT uLength) = 0;
+    virtual HRESULT __stdcall get_address(VARIANT* pv) = 0;
+    virtual HRESULT __stdcall Rewind() = 0;
+    virtual HRESULT __stdcall ReadLock(BSTR sRelUOL, UINT uSize, IWzSeekableArchive** ppArchive) = 0;
+};
+
+// IWzPackage.idl
+struct __declspec(uuid("E610818B-038D-4522-9232-30FCD5F4737C")) IWzPackage : public IWzNameSpace {
+    virtual HRESULT __stdcall Init(const wchar_t* sKey, const wchar_t* sBaseUOL, IWzSeekableArchive* pArchive) = 0;
+};
+
+// IWzGr2D.idl
+struct __declspec(uuid("E576EA33-D465-4F08-AAB1-E78DF73EE6D9")) IWzGr2D : public IUnknown {
+    virtual HRESULT __stdcall Initialize(UINT uWidth, UINT uHeight, VARIANT vHwnd, VARIANT vBPP, VARIANT vRefreshRate) = 0;
+    virtual HRESULT __stdcall Uninitialize() = 0;
+    virtual HRESULT __stdcall get_nextRenderTime(INT* pnTime) = 0;
+    virtual HRESULT __stdcall UpdateCurrentTime(INT tTime) = 0;
+    virtual HRESULT __stdcall RenderFrame() = 0;
+    virtual HRESULT __stdcall SetFrameSkip() = 0;
+    virtual HRESULT __stdcall ToggleFpsPanel() = 0;
+    virtual HRESULT __stdcall DisableFpsPanel() = 0;
+    virtual HRESULT __stdcall get_width(UINT* puWidth) = 0;
+    virtual HRESULT __stdcall get_height(UINT* puHeight) = 0;
+    virtual HRESULT __stdcall get_bpp(UINT* puBPP) = 0;
+    virtual HRESULT __stdcall get_refreshRate(UINT* puRefreshRate) = 0;
+    virtual HRESULT __stdcall get_fps100(UINT* puFps100) = 0;
+    virtual HRESULT __stdcall get_currentTime(INT* pnCurrentTime) = 0;
+    virtual HRESULT __stdcall get_fullScreen(INT* pnFullScreen) = 0;
+    virtual HRESULT __stdcall put_fullScreen(INT nFullScreen) = 0;
+    virtual HRESULT __stdcall get_backColor(UINT* puColor) = 0;
+    virtual HRESULT __stdcall put_backColor(UINT uColor) = 0;
+    virtual HRESULT __stdcall get_redTone(IWzVector2D** ppVector) = 0;
+    virtual HRESULT __stdcall get_greenBlueTone(IWzVector2D** ppVector) = 0;
+    virtual HRESULT __stdcall get_center(IWzVector2D** ppVector) = 0;
+    virtual HRESULT __stdcall GetSnapshot(VARIANT pvBuffer, UINT uBufferSize, INT x, INT y) = 0;
+    virtual HRESULT __stdcall CreateLayer(INT nLeft, INT nTop, UINT uWidth, UINT uHeight, INT nZ, VARIANT vCanvas, VARIANT dwFilter, IWzGr2DLayer** ppLayer) = 0;
+    virtual HRESULT __stdcall InitializeFlashByDevice() = 0;
+    virtual HRESULT __stdcall LoadMediaFile(const char* sSource) = 0;
+    virtual HRESULT __stdcall SetFlashAbsLocation(INT nX, INT nY) = 0;
+    virtual HRESULT __stdcall RenderFlash() = 0;
+    virtual HRESULT __stdcall ReleaseFlash() = 0;
+    virtual HRESULT __stdcall IsRenderFlash(INT* pnRenderFlash) = 0;
+};
+
 // ---- 智能指针 ----
 
 _COM_SMARTPTR_TYPEDEF(IUnknown, __uuidof(IUnknown));
+_COM_SMARTPTR_TYPEDEF(IEnumVARIANT, __uuidof(IEnumVARIANT));
 _COM_SMARTPTR_TYPEDEF(IWzSerialize, __uuidof(IWzSerialize));
 _COM_SMARTPTR_TYPEDEF(IWzProperty, __uuidof(IWzProperty));
 _COM_SMARTPTR_TYPEDEF(IWzResMan, __uuidof(IWzResMan));
@@ -243,3 +337,11 @@ _COM_SMARTPTR_TYPEDEF(IWzCanvas, __uuidof(IWzCanvas));
 _COM_SMARTPTR_TYPEDEF(IWzShape2D, __uuidof(IWzShape2D));
 _COM_SMARTPTR_TYPEDEF(IWzVector2D, __uuidof(IWzVector2D));
 _COM_SMARTPTR_TYPEDEF(IWzGr2DLayer, __uuidof(IWzGr2DLayer));
+_COM_SMARTPTR_TYPEDEF(IWzNameSpaceProperty, __uuidof(IWzNameSpaceProperty));
+_COM_SMARTPTR_TYPEDEF(IWzNameSpace, __uuidof(IWzNameSpace));
+_COM_SMARTPTR_TYPEDEF(IWzWritableNameSpace, __uuidof(IWzWritableNameSpace));
+_COM_SMARTPTR_TYPEDEF(IWzFileSystem, __uuidof(IWzFileSystem));
+_COM_SMARTPTR_TYPEDEF(IWzArchive, __uuidof(IWzArchive));
+_COM_SMARTPTR_TYPEDEF(IWzSeekableArchive, __uuidof(IWzSeekableArchive));
+_COM_SMARTPTR_TYPEDEF(IWzPackage, __uuidof(IWzPackage));
+_COM_SMARTPTR_TYPEDEF(IWzGr2D, __uuidof(IWzGr2D));

@@ -177,9 +177,14 @@
     </ClInclude>
     <ClInclude Include="BossHP.h" />
     <ClInclude Include="MobHpTag.h" />
+    <ClInclude Include="CustomWz.h" />
+    <ClInclude Include="InGameRes.h" />
+    <ClInclude Include="ktl\ztl.h" />
+    <ClInclude Include="ktl\wvs.h" />
     <ClInclude Include="WzLib\zcomdef.h" />
     <ClInclude Include="WzLib\WzInterfaces.h" />
     <ClInclude Include="WzLib\ClientZtl.h" />
+    <ClInclude Include="WzLib\ClientPcom.h" />
     <ClInclude Include="HpMpAlert.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="FixBuddy.h" />
@@ -226,6 +231,8 @@
   <ItemGroup>
     <ClCompile Include="BossHP.cpp" />
     <ClCompile Include="MobHpTag.cpp" />
+    <ClCompile Include="CustomWz.cpp" />
+    <ClCompile Include="InGameRes.cpp" />
     <ClCompile Include="HpMpAlert.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ijl15.cpp" />
