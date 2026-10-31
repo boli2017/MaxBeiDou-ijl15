@@ -367,9 +367,8 @@ public:
 	~ZRef() {
 		_Release();
 	}
-	explicit ZRef(const ZAllocHelper& _ALLOC) : p(nullptr) {
-		_Alloc();
-	}
+	// 注：不提供 ZAllocHelper 版构造（_Alloc/_AllocRaw 未移植，本模块只
+	// 引用客户端已存在的对象，不负责创建 ZRefCounted 对象）
 	ZRef(T* pT, bool bAddRef = true) : p(pT) {
 		if (bAddRef) {
 			_AddRef();
