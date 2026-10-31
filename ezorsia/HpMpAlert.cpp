@@ -114,11 +114,31 @@ static void __fastcall SaveGlobal_Hook(void* pThis, void* edx) {
     s_SaveGlobal(pThis, edx);
     SendHpMpAlertFromStatusBar();
 }
+static unsigned short PeekOpcode(CInPacket* packet) {
+    __try {
+        if (packet == nullptr || packet->Data == nullptr || packet->Size < 6) {
+            return 0;
+        }
+        const unsigned char* data = reinterpret_cast<const unsigned char*>(packet->Data);
+        return *reinterpret_cast<const unsigned short*>(data + 4);
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return 0;
+    }
+}
 using ProcessPacket_t = void(__fastcall*)(void* pThis, void* edx, CInPacket* packet);
 static ProcessPacket_t s_ProcessPacket = reinterpret_cast<ProcessPacket_t>(kProcessPacketAddr);
 static void __fastcall ProcessPacket_Hook(void* pThis, void* edx, CInPacket* packet) {
     HandleHpMpAlertPacket(packet);
-    s_ProcessPacket(pThis, edx, packet);
+    __try {
+        s_ProcessPacket(pThis, edx, packet);
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        // 原版处理单个封包时崩溃就丢弃这个封包，避免整个客户端进程挂掉后重启重连。
+        // 典型场景：进入地图(SET_FIELD)之前收到 STAT_CHANGED，此时角色对象尚未建立，
+        // 原版 STAT_CHANGED 处理函数会解引用空对象触发 C0000005。
+        char szLog[96];
+        wsprintfA(szLog, "[ijl15] ProcessPacket: 封包处理异常已忽略, opcode=0x%04X\r\n", PeekOpcode(packet));
+        OutputDebugStringA(szLog);
+    }
 }
 } // namespace
 void HookSaveGlobal(bool enable) {
