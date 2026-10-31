@@ -246,6 +246,7 @@ public:
 		m_apBuff[nIndex] = p;
 	}
 	// 客户端进程内的 ZAllocEx<T> 实例（固定地址，见下方特化定义）
+	static ZAllocEx* _s_pAlloc;
 	static void* s_Alloc(size_t uSize) {
 		return _s_pAlloc->Alloc(uSize);
 	}
@@ -265,6 +266,20 @@ template <>
 ZAllocEx<ZAllocStrSelector<char>>* ZAllocEx<ZAllocStrSelector<char>>::_s_pAlloc = reinterpret_cast<ZAllocEx<ZAllocStrSelector<char>>*>(0x00BF0A90);
 template <>
 ZAllocEx<ZAllocStrSelector<wchar_t>>* ZAllocEx<ZAllocStrSelector<wchar_t>>::_s_pAlloc = reinterpret_cast<ZAllocEx<ZAllocStrSelector<wchar_t>>*>(0x00BF0BA8);
+
+// ---- ZRefCounted（引用计数基类，vptr + ref + prev = 0xC） ----
+
+class ZRefCounted {
+public:
+	union {
+		volatile long _m_nRef;
+		ZRefCounted* _m_pNext;
+	};
+	ZRefCounted* _m_pPrev;
+
+	virtual ~ZRefCounted() = default;
+};
+static_assert(sizeof(ZRefCounted) == 0xC);
 
 // ---- zrecyclable（仅保留布局必需部分：ZRefCountedDummy 的第二个 vtable） ----
 

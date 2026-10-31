@@ -75,7 +75,7 @@ public:
 		if (!nWidth || !nHeight) {
 			return E_INVALIDARG;
 		}
-		if (m_screenMode.m_screenMode.nWidth == nWidth && m_screenMode.m_screenMode.nHeight == nHeight) {
+		if (m_screenMode.nWidth == nWidth && m_screenMode.nHeight == nHeight) {
 			return S_OK;
 		}
 		if (!s_FindScreenMode) {
@@ -86,12 +86,12 @@ public:
 			}
 		}
 		SCREENMODE mode;
-		if (!m_bInitialized || !s_FindScreenMode(this, &mode, m_screenMode.m_screenMode.bFullScreen, nWidth, nHeight, 0)) {
+		if (!m_bInitialized || !s_FindScreenMode(this, &mode, m_screenMode.bFullScreen, nWidth, nHeight, 0)) {
 			return E_FAIL;
 		}
-		m_screenMode.m_screenMode.nWidth = mode.m_screenMode.nWidth;
-		m_screenMode.m_screenMode.nHeight = mode.m_screenMode.nHeight;
-		m_screenMode.m_screenMode.bFullScreen = mode.m_screenMode.bFullScreen;
+		m_screenMode.nWidth = mode.nWidth;
+		m_screenMode.nHeight = mode.nHeight;
+		m_screenMode.bFullScreen = mode.bFullScreen;
 		m_hrErrorCode = 0x88760869; // DEVICENOTRESET：让 Gr2D 每帧检查走设备重置
 		return S_OK;
 	}
@@ -184,7 +184,7 @@ void ResizeGameWindow(int nWidth, int nHeight) {
 		return;
 	}
 	int nX = mi.rcWork.left + ((mi.rcWork.right - mi.rcWork.left) - nW) / 2;
-	int nY = mi.rcWork.top + zmax(0, ((mi.rcWork.bottom - mi.rcWork.top) - nH) / 2);
+	int nY = mi.rcWork.top + zmax<int>(0, ((mi.rcWork.bottom - mi.rcWork.top) - nH) / 2);
 	SetWindowPos(hWnd, nullptr, nX, nY, nW, nH, SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
@@ -654,12 +654,12 @@ void __fastcall CWnd__OnMoveWnd_hook(CWnd* pThis, void* _EDX, int l, int t) {
 	int nWidth = 0;
 	int nHeight = 0;
 	if (pThis->m_pLayer) {
-		UINT uW = 0;
-		UINT uH = 0;
-		pThis->m_pLayer->get_width(&uW);
-		pThis->m_pLayer->get_height(&uH);
-		nWidth = static_cast<int>(uW);
-		nHeight = static_cast<int>(uH);
+		INT nW = 0;
+		INT nH = 0;
+		pThis->m_pLayer->get_width(&nW);
+		pThis->m_pLayer->get_height(&nH);
+		nWidth = nW;
+		nHeight = nH;
 	}
 	// Save m_ptCursorRel
 	POINT pt;
@@ -676,22 +676,23 @@ void __fastcall CWnd__OnMoveWnd_hook(CWnd* pThis, void* _EDX, int l, int t) {
 	SetRect(&rcThis, nLeft, nTop, nLeft + nWidth, nTop + nHeight);
 	auto pos = CWndMan::ms_lpWindow.GetHeadPosition();
 	while (pos) {
-		auto& pNext = CWndMan::ms_lpWindow.GetNext(pos);
-		if (&pNext == pThis || pThis->IsMyAddOn(&pNext) ||
-			&pNext == reinterpret_cast<CWnd*>(CUIStatusBar::GetInstance())) {
+		// ZList<CWnd*>：GetNext 返回 CWnd*&，pNext 本身就是 CWnd*
+		auto pNext = CWndMan::ms_lpWindow.GetNext(pos);
+		if (pNext == pThis || pThis->IsMyAddOn(pNext) ||
+			pNext == reinterpret_cast<CWnd*>(CUIStatusBar::GetInstance())) {
 			continue;
 		}
-		int nNextLeft = pNext.GetAbsLeft();
-		int nNextTop = pNext.GetAbsTop();
+		int nNextLeft = pNext->GetAbsLeft();
+		int nNextTop = pNext->GetAbsTop();
 		int nNextWidth = 0;
 		int nNextHeight = 0;
-		if (pNext.m_pLayer) {
-			UINT uW = 0;
-			UINT uH = 0;
-			pNext.m_pLayer->get_width(&uW);
-			pNext.m_pLayer->get_height(&uH);
-			nNextWidth = static_cast<int>(uW);
-			nNextHeight = static_cast<int>(uH);
+		if (pNext->m_pLayer) {
+			INT nW = 0;
+			INT nH = 0;
+			pNext->m_pLayer->get_width(&nW);
+			pNext->m_pLayer->get_height(&nH);
+			nNextWidth = nW;
+			nNextHeight = nH;
 		}
 		RECT rcNext, rcIntersect;
 		SetRect(&rcNext, nNextLeft - 10, nNextTop - 10, nNextLeft + nNextWidth + 10, nNextTop + nNextHeight + 10);
@@ -740,8 +741,8 @@ CUtilDlgEx_CreateUtilDlgEx_t CUtilDlgEx__CreateUtilDlgEx_orig = reinterpret_cast
 
 void __fastcall CUtilDlgEx__CreateUtilDlgEx_hook(void* pThis, void* edx) {
 	auto pDlg = reinterpret_cast<CUtilDlgEx*>(pThis);
-	int nLeft = zclamp(sRectQuestDlg.left - pDlg->m_wndWidth / 2, 0, get_screen_width());
-	int nTop = zclamp(sRectQuestDlg.top - pDlg->m_wndHeight / 2, 0, get_screen_height());
+	int nLeft = zclamp<int>(sRectQuestDlg.left - pDlg->m_wndWidth / 2, 0, get_screen_width());
+	int nTop = zclamp<int>(sRectQuestDlg.top - pDlg->m_wndHeight / 2, 0, get_screen_height());
 	// CDialog::CreateDlg(this, nLeft, nTop, m_wndWidth, m_wndHeight, 10, 1, 0, 1);
 	CWnd__CreateWnd_orig(pThis, edx, nLeft, nTop, pDlg->m_wndWidth, pDlg->m_wndHeight, 10, 1, nullptr, 1);
 }
@@ -809,21 +810,21 @@ void CTemporaryStatView__AdjustPosition_hook(CTemporaryStatView* pThis) {
 		int nWs = 0;
 		int nHs = 0;
 		if (pNext->pLayer) {
-			UINT uW = 0;
-			UINT uH = 0;
+			INT uW = 0;
+			INT uH = 0;
 			pNext->pLayer->get_width(&uW);
 			pNext->pLayer->get_height(&uH);
-			nW = static_cast<int>(uW);
-			nH = static_cast<int>(uH);
+			nW = uW;
+			nH = uH;
 			pNext->pLayer->RelMove((32 - nW) / 2 + nOffsetX, (32 - nH) / 2 - nOffsetY, vtEmpty, vtEmpty);
 		}
 		if (pNext->pLayerShadow) {
-			UINT uW = 0;
-			UINT uH = 0;
+			INT uW = 0;
+			INT uH = 0;
 			pNext->pLayerShadow->get_width(&uW);
 			pNext->pLayerShadow->get_height(&uH);
-			nWs = static_cast<int>(uW);
-			nHs = static_cast<int>(uH);
+			nWs = uW;
+			nHs = uH;
 			pNext->pLayerShadow->RelMove((32 - nWs) / 2 + nOffsetX, (32 - nHs) / 2 - nOffsetY, vtEmpty, vtEmpty);
 		}
 		nOffsetX += 32;

@@ -322,7 +322,7 @@ public:
 	}
 
 	void MoveWnd(int l, int t) {
-		m_pLayer->RelMove(l, t);
+		m_pLayer->RelMove(l, t, vtEmpty, vtEmpty);
 	}
 	void InvalidateRect(const RECT* pRect) {
 		reinterpret_cast<void(__thiscall*)(CWnd*, const RECT*)>(0x009E04C9)(this, pRect);
