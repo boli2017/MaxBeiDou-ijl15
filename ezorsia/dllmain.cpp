@@ -149,7 +149,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		//Hook_com_ptr_t_IWzProperty__ctor(true);
 		//Hook_com_ptr_t_IWzProperty__dtor(true);
 
-		Client::UpdateGameStartup();
+		Client::UpdateGameStartup(reader.GetBoolean("general", "NoCloseRangePunch", true));
 
 		std::cout << "Applying resolution " << Client::m_nGameWidth << "x" << Client::m_nGameHeight << std::endl;
 		Client::UpdateResolution();

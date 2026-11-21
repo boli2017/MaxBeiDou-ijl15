@@ -2,7 +2,7 @@
 class Client
 {
 public:
-	static void UpdateGameStartup();
+	static void UpdateGameStartup(bool noCloseRangePunch);
 	static void EnableNewIGCipher();
 	static void UpdateResolution();
 	static void UpdateLogin();

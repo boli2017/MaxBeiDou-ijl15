@@ -31,7 +31,48 @@ int Client::serverIP_Port = 8484; // 服务器端口
 bool Client::talkRepeat = false; // 重复说话
 int Client::talkTime = 2000; // 说话间隔时间
 
-void Client::UpdateGameStartup() {
+namespace {
+	void DisableCloseRangePunch() {
+		// 沿用“弓标不挥拳”版的近身目标分支。
+		const auto executable = reinterpret_cast<const unsigned char*>(GetModuleHandleW(nullptr));
+		if (!executable) {
+			return;
+		}
+
+		const auto branchAddress = reinterpret_cast<DWORD>(executable) + 0x005516C2;
+		const auto branch = reinterpret_cast<unsigned char*>(branchAddress);
+		const unsigned char expected[] = { 0x0F, 0x84, 0xC7, 0xFC, 0xFF, 0xFF };
+		MEMORY_BASIC_INFORMATION region{};
+		if (!VirtualQuery(branch, &region, sizeof(region)) ||
+			region.AllocationBase != executable || region.State != MEM_COMMIT ||
+			(region.Protect != PAGE_EXECUTE_READ && region.Protect != PAGE_EXECUTE_READWRITE &&
+				region.Protect != PAGE_EXECUTE_WRITECOPY)) {
+			return;
+		}
+
+		const auto regionOffset = branchAddress - reinterpret_cast<DWORD>(region.BaseAddress);
+		if (region.RegionSize - regionOffset < sizeof(expected) ||
+			memcmp(branch, expected, sizeof(expected)) != 0) {
+			return;
+		}
+
+		auto opcode = branch + 1;
+		DWORD oldProtection;
+		if (!VirtualProtect(opcode, 1, PAGE_EXECUTE_READWRITE, &oldProtection)) {
+			return;
+		}
+		*opcode = 0x89; // JE -> JNS，保留跳转目标。
+		DWORD ignoredProtection;
+		VirtualProtect(opcode, 1, oldProtection, &ignoredProtection);
+		FlushInstructionCache(GetCurrentProcess(), opcode, 1);
+	}
+}
+
+void Client::UpdateGameStartup(bool noCloseRangePunch) {
+	if (noCloseRangePunch) {
+		DisableCloseRangePunch();
+	}
+
 	//Memory::CodeCave(cc0x0044E550, dw0x0044E550, dw0x0044E550Nops); //run from packed client //skip //sub_44E546
 	//Memory::CodeCave(cc0x0044E5BE, dw0x0044E5BE, dw0x0044E5BENops); //run from packed client //skip
 
