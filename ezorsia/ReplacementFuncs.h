@@ -196,6 +196,17 @@ bool HookCWvsApp__InitializeResMan(bool bEnable)	//resman hook that does nothing
 }
 //#pragma optimize("", on)
 std::unordered_map<int, std::string> newKeyValuePairs = {
+    {0x152E, "\xC1\xFA\xC9\xF1"},
+    {0x152F, "\xC1\xFA\xC9\xF1" "1"},
+    {0x1530, "\xC1\xFA\xC9\xF1" "2"},
+    {0x1531, "\xC1\xFA\xC9\xF1" "3"},
+    {0x1532, "\xC1\xFA\xC9\xF1" "4"},
+    {0x1533, "\xC1\xFA\xC9\xF1" "5"},
+    {0x1534, "\xC1\xFA\xC9\xF1" "6"},
+    {0x1535, "\xC1\xFA\xC9\xF1" "7"},
+    {0x1536, "\xC1\xFA\xC9\xF1" "8"},
+    {0x1537, "\xC1\xFA\xC9\xF1" "9"},
+    {0x1538, "\xC1\xFA\xC9\xF1" "10"},
     {11, "设置"},
     {12, "新手"},
     {13, "战士"},

@@ -209,6 +209,7 @@
     <ClInclude Include="NetAdapterFix.h" />
     <ClInclude Include="SoundStreamFix.h" />
     <ClInclude Include="D3D8PortraitFix.h" />
+    <ClInclude Include="EvanPatch.h" />
     <ClInclude Include="AutoTypes.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -230,6 +231,7 @@
     <ClCompile Include="NetAdapterFix.cpp" />
     <ClCompile Include="SoundStreamFix.cpp" />
     <ClCompile Include="D3D8PortraitFix.cpp" />
+    <ClCompile Include="EvanPatch.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

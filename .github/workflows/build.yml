@@ -2,10 +2,10 @@ name: Build
 
 on:
   push:
-    branches: [BeiDou]
+    branches: [BeiDou, master, dev]
     tags: ['v*']
   pull_request:
-    branches: [BeiDou]
+    branches: [BeiDou, master, dev]
   workflow_dispatch:
 
 permissions:
@@ -40,10 +40,25 @@ jobs:
           Copy-Item out\Release\ijl15.pdb dist\ -ErrorAction SilentlyContinue
           Copy-Item ezorsia\config.ini dist\
 
+      # master/dev（以及BeiDou、tag、PR）构建都生成可直接使用的 zip 包
+      - name: Package
+        shell: pwsh
+        run: |
+          $ref = '${{ github.ref_name }}' -replace '[\\/:*?"<>|]', '-'
+          $zip = "ijl15-$ref-${{ github.sha }}.zip"
+          Compress-Archive -Path dist\ijl15.dll, dist\config.ini -DestinationPath $zip -Force
+          "PACKAGE=$zip" >> $env:GITHUB_ENV
+
       - uses: actions/upload-artifact@v7
         with:
           name: ijl15-${{ github.sha }}
           path: dist/
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ijl15-package-${{ github.sha }}
+          path: ${{ env.PACKAGE }}
           if-no-files-found: error
 
   release:

@@ -13,6 +13,7 @@
 #include "LocaleFix.h"
 #include "NetAdapterFix.h"
 #include "SoundStreamFix.h"
+#include "EvanPatch.h"
 #pragma comment(lib, "ws2_32.lib")
 
 // config.ini can use IP or hostname (ServerIP_Address=...).
@@ -74,6 +75,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		bool forceFontCharset = true;
 		bool fixAdapterInfo = true;
 		bool reuseSoundStreams = true;
+		bool evanPatch = true;
 		INIReader reader("config.ini");
 		if (reader.ParseError() == 0) {
 			Client::m_nGameWidth = reader.GetInteger("general", "width", 1280);
@@ -111,6 +113,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 			forceFontCharset = reader.GetBoolean("compat", "ForceFontCharset", true);
 			fixAdapterInfo = reader.GetBoolean("compat", "FixAdapterInfo", true);
 			reuseSoundStreams = reader.GetBoolean("compat", "ReuseSoundStreams", true);
+			evanPatch = reader.GetBoolean("general", "EvanPatch", true);
 		}
 
 		// 目标分辨率不在显卡模式表里时补上（RDP会话、macOS内置屏）
@@ -121,6 +124,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		NetAdapterFix_Install(fixAdapterInfo);
 		// 每播一次音效都重开一条 MP3 解码流，Wine 下光开流就要 100ms+
 		SoundStreamFix_Install(reuseSoundStreams);
+		EvanPatch::Install(evanPatch);
 
 		Hook_CreateMutexA(true); //multiclient //ty darter, angel, and alias!
 		D3D8PortraitFix::HookD3D8AdapterRemap(true); //portrait-primary monitor: spoof landscape modes for Gr2D_DX8, keep device on adapter 0
